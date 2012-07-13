@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<title>Web Console test page</title>
+</head>
+<body>
+<button onclick="newData(this)">new data</button>
+<button onclick="getData(this)">continue get data</button>
+<div id="console" style="width:90%; height:500px; background-color:gray; overflow-y:auto; white-space: pre; word-break:break-all;">
+This is console log:
+</div>
+<script type="text/javascript" src="./jquery.js"></script>
+<script type="text/javascript">
+var start = 0;
+var getting = false;
+var isDebug = true;
+function newData (obj){
+	$(obj).attr("disabled","disabled");
+	$.get("./createdate.jsp", function(result){
+		$(obj).attr("disabled","").attr("disabled",false);
+	});
+}
+function getData (obj){
+	if(getting){	//stop continue get data
+		$(obj).attr("disabled","").attr("disabled",false).html("continue get data");
+		getting = false;
+		return;
+	}
+	getting = true;
+	$(obj).attr("disabled","disabled").html("stop get data");
+	_getDate();
+	$(obj).attr("disabled","").attr("disabled",false);
+}
+function _getDate() {
+	if(!getting){
+		return;
+	}
+	$.get("./WebConsole?job=test&start=" + start, function(result){
+		if(result) {
+			var i = result.indexOf(':');
+			start = parseInt(result.substring(0, i));
+			var split = "";
+			if(isDebug){
+				var today=new Date();
+				split = "\n" + today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate() + " " 
+				+  today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + "\n";
+			}
+			$("#console").append(split + result.substring(i + 1));
+		}
+	});
+	setTimeout("_getDate();", 1000);
+}
+</script>
+</body>
+</html>
